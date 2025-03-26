@@ -1,0 +1,59 @@
+[
+  {
+    "name": "getTodoItems",
+    "description": "Get Todo Items list."
+  },
+  {
+    "name": "insertTodoItem",
+    "description": "Insert a new todo item in the list.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The text of the todo item to insert."
+        }
+      },
+      "required": [
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "updateTodoItem",
+    "description": "Update the todo item in the list.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "The id of the todo item in the list."
+        },
+        "text": {
+          "type": "string",
+          "description": "Updated text for the todo item."
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ]
+    }
+  },
+  {
+    "name": "removeTodoItem",
+    "description": "Remove Todo Item from the list.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "The id of the item in the list."
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  }
+]

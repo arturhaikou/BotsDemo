@@ -1,0 +1,96 @@
+{
+  "type": "AdaptiveCard",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "${title}"
+    },
+    {
+      "type": "ColumnSet",
+      "style": "emphasis",
+      "$data": "${items}",
+      "columns": [
+        {
+          "type": "Column",
+          "horizontalAlignment": "left",
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "${text}",
+              "id": "text${id}"
+            },
+            {
+              "type": "Input.Text",
+              "id": "text-${id}",
+              "value": "${text}",
+              "isVisible": false,
+              "inlineAction": {
+                "type": "Action.Execute",
+                "title": "Update",
+                "verb": "updateTodoItem"
+              }
+            }
+          ]
+        },
+        {
+          "type": "Column",
+          "items": [
+            {
+              "type": "ActionSet",
+              "horizontalAlignment": "right",
+              "actions": [
+                {
+                  "type": "Action.ToggleVisibility",
+                  "title": "Update",
+                  "mode": "secondary",
+                  "targetElements": [
+                    {
+                      "elementId": "text${id}",
+                      "isVisible": false
+                    },
+                    {
+                      "elementId": "text-${id}",
+                      "isVisible": true
+                    }
+                  ]
+                },
+                {
+                  "type": "Action.Execute",
+                  "title": "Remove",
+                  "verb": "removeTodoItem",
+                  "data": {
+                    "id": "${id}"
+                  },
+                  "mode": "secondary"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.ShowCard",
+      "title": "New",
+      "card": {
+        "type": "AdaptiveCard",
+        "body": [
+          {
+            "type": "Input.Text",
+            "id": "inputText",
+            "label": "Add a new item to the list"
+          }
+        ],
+        "actions": [
+          {
+            "type": "Action.Execute",
+            "title": "Add",
+            "verb": "addTodoItem"
+          }
+        ]
+      }
+    }
+  ]
+}
