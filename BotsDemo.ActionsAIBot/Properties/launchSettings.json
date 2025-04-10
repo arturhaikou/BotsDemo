@@ -18,6 +18,6 @@
         "TEAMSFX_NOTIFICATION_STORE_FILENAME": ".notification.testtoolstore.json"
       },
       "hotReloadProfile": "aspnetcore"
-    },
+    }
   }
 }

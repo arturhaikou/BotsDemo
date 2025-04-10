@@ -7,7 +7,7 @@ namespace BotsDemo.SimpleEchoBot.Bots
     {
         protected override async Task OnMessageActivityAsync(ITurnContext<IMessageActivity> turnContext, CancellationToken cancellationToken)
         {
-            var replyActivity = MessageFactory.Text($"You said {turnContext.Activity.Text}.");
+            var replyActivity = MessageFactory.Text($"You said: {turnContext.Activity.Text}.");
             await turnContext.SendActivityAsync(replyActivity, cancellationToken);
         }
     }

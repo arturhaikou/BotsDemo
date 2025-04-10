@@ -12,7 +12,7 @@ namespace BotsDemo.TeamsCommandBot
     {
         protected override async Task OnMembersAddedAsync(IList<ChannelAccount> membersAdded, ITurnContext<IConversationUpdateActivity> turnContext, CancellationToken cancellationToken)
         {
-            var welcomeText = "Welcome to the Todo Command Bot! I can help you with a todo items list. Type \"todo\" to get started.";
+            var welcomeText = """Welcome to the Todo Command Bot! I can help you with a todo items list. Type "/todo" to get started.""";
             foreach (var member in membersAdded)
             {
                 if (member.Id != turnContext.Activity.Recipient.Id)

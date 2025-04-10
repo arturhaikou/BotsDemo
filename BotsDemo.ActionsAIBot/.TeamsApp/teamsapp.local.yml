@@ -8,7 +8,7 @@ provision:
   - uses: teamsApp/create
     with:
       # Teams app name
-      name: BotsDemo.{{BOT_PROJECT}}{{APP_NAME_SUFFIX}}
+      name: BotsDemo.ActionsAIBot${{APP_NAME_SUFFIX}}
     # Write the information of created resources into environment file for
     # the specified environment variable(s).
     writeToEnvironmentFile:
@@ -18,7 +18,7 @@ provision:
   - uses: aadApp/create
     with:
       # The Microsoft Entra application's display name
-      name: BotsDemo.${{BOT_PROJECT}}{{APP_NAME_SUFFIX}}
+      name: BotsDemo.ActionsAIBot${{APP_NAME_SUFFIX}}
       generateClientSecret: true
       signInAudience: AzureADMultipleOrgs
     writeToEnvironmentFile:
@@ -32,21 +32,19 @@ provision:
   # Generate runtime appsettings to JSON file
   - uses: file/createOrUpdateJsonFile
     with:
-      target: ../BotsDemo.${{BOT_PROJECT}}/appsettings.Development.json
+      target: ../BotsDemo.ActionsAIBot/appsettings.Development.json
       content:
         BOT_TYPE: 'MultiTenant'
         BOT_ID: ${{BOT_ID}}
         BOT_PASSWORD: ${{SECRET_BOT_PASSWORD}}
-        Azure:
-          OpenAIApiKey: ${{SECRET_AZURE_OPENAI_API_KEY}}
-          OpenAIEndpoint: ${{AZURE_OPENAI_ENDPOINT}}
-          OpenAIDeploymentName: ${{AZURE_OPENAI_DEPLOYMENT_NAME}}
+        OpenAI:
+          ApiKey: ${{SECRET_OPENAI_API_KEY}}
 
   # Create or update the bot registration on dev.botframework.com
   - uses: botFramework/create
     with:
       botId: ${{BOT_ID}}
-      name: BotsDemo.${{BOT_PROJECT}}
+      name: BotsDemo.ActionsAIBot
       messagingEndpoint: ${{BOT_ENDPOINT}}/api/messages
       description: ""
       channels:
@@ -57,7 +55,6 @@ provision:
     with:
       # Path to manifest template
       manifestPath: ./appPackage/manifest.json
-
   # Build Teams app package with latest env value
   - uses: teamsApp/zipAppPackage
     with:
@@ -65,7 +62,6 @@ provision:
       manifestPath: ./appPackage/manifest.json
       outputZipPath: ./appPackage/build/appPackage.${{TEAMSFX_ENV}}.zip
       outputFolder: ./appPackage/build
- 
   # Validate app package using validation rules
   - uses: teamsApp/validateAppPackage
     with:
@@ -79,4 +75,3 @@ provision:
     with:
       # Relative path to this file. This is the path for built zip file.
       appPackagePath: ./appPackage/build/appPackage.${{TEAMSFX_ENV}}.zip
-

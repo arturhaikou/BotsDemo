@@ -11,7 +11,7 @@ provision:
   - uses: teamsApp/create
     with:
       # Teams app name
-      name: BotsDemo.BasicAIBot{{APP_NAME_SUFFIX}}
+      name: BotsDemo.ActionsAIBot${{APP_NAME_SUFFIX}}
     # Write the information of created resources into environment file for
     # the specified environment variable(s).
     writeToEnvironmentFile:
@@ -41,6 +41,7 @@ provision:
       # Teams Toolkit will download this bicep CLI version from github for you,
       # will use bicep CLI in PATH if you remove this config.
       bicepCliVersion: v0.9.1
+
   # Validate using manifest schema
   - uses: teamsApp/validateManifest
     with:
@@ -70,8 +71,8 @@ provision:
 deploy:
   - uses: cli/runDotnetCommand
     with:
-      args: publish --configuration Release BotsDemo.BasicAIBot.csproj
-      workingDirectory: ../BotsDemo.BasicAIBot
+      args: publish --configuration Release BotsDemo.ActionsAIBot.csproj
+      workingDirectory: ../BotsDemo.ActionsAIBot
   # Deploy your application to Azure App Service using the zip deploy feature.
   # For additional details, refer to https://aka.ms/zip-deploy-to-app-services.
   - uses: azureAppService/zipDeploy
@@ -83,5 +84,5 @@ deploy:
       # You can replace it with your existing Azure Resource id
       # or add it to your environment variable file.
       resourceId: ${{BOT_AZURE_APP_SERVICE_RESOURCE_ID}}
-      workingDirectory: ../BotsDemo.BasicAIBot
-projectId: a5c938a5-18f2-40cb-97e0-ed431c0df84c
+      workingDirectory: ../BotsDemo.ActionsAIBot
+projectId: 68915cbc-a01d-406d-8786-8b64705bd744

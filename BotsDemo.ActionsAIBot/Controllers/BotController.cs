@@ -1,17 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Bot.Builder;
-using Microsoft.Teams.AI;
+using Microsoft.Bot.Builder.Integration.AspNet.Core;
 
-namespace BotsDemo.BasicAIBot.Controllers
+namespace BotsDemo.ActionsAIBot.Controllers
 {
     [Route("api/messages")]
     [ApiController]
     public class BotController : ControllerBase
     {
-        private readonly TeamsAdapter Adapter;
+        private readonly CloudAdapter Adapter;
         private readonly IBot Bot;
 
-        public BotController(TeamsAdapter adapter, IBot bot)
+        public BotController(CloudAdapter adapter, IBot bot)
         {
             Adapter = adapter;
             Bot = bot;

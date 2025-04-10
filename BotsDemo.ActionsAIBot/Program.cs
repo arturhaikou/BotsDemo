@@ -1,25 +1,22 @@
-using BotsDemo.BasicAIBot;
-using BotsDemo.BasicAIBot.Models;
+using BotsDemo.ActionsAIBot;
+using BotsDemo.ActionsAIBot.Actions;
+using BotsDemo.Data.Contexts;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Connector.Authentication;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Teams.AI;
 using Microsoft.Teams.AI.AI.Models;
 using Microsoft.Teams.AI.AI.Planners;
 using Microsoft.Teams.AI.AI.Prompts;
-using Microsoft.Teams.AI.AI;
-using BotsDemo.BasicAIBot.HttpClientHandlers;
-using BotsDemo.Data.Contexts;
-using Microsoft.EntityFrameworkCore;
-using BotsDemo.BasicAIBot.ActionHandlers;
+using Microsoft.Teams.AI.State;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddHttpClient("WebClient", client => client.Timeout = TimeSpan.FromSeconds(600));
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddDbContext<TodoDbContext>(options => options.UseInMemoryDatabase("TodoItemsDB"), ServiceLifetime.Singleton, ServiceLifetime.Singleton);
-builder.Services.AddSingleton<TodoItemsActionHandler>();
+
 // Prepare Configuration for ConfigurationBotFrameworkAuthentication
 var config = builder.Configuration.Get<ConfigOptions>();
 builder.Configuration["MicrosoftAppType"] = config.BOT_TYPE;
@@ -28,23 +25,24 @@ builder.Configuration["MicrosoftAppPassword"] = config.BOT_PASSWORD;
 builder.Configuration["MicrosoftAppTenantId"] = config.BOT_TENANT_ID;
 // Create the Bot Framework Authentication to be used with the Bot Adapter.
 builder.Services.AddSingleton<BotFrameworkAuthentication, ConfigurationBotFrameworkAuthentication>();
-builder.Services.AddSingleton(LoggerFactory.Create(configure => configure.AddConsole()));
+builder.Services.AddDbContext<TodoDbContext>(options => options.UseInMemoryDatabase("TodoItemsDB"), ServiceLifetime.Singleton, ServiceLifetime.Singleton);
+
 // Create the Cloud Adapter with error handling enabled.
 // Note: some classes expect a BotAdapter and some expect a BotFrameworkHttpAdapter, so
 // register the same adapter instance for both types.
-builder.Services.AddSingleton<TeamsAdapter, AdapterWithErrorHandler>();
-builder.Services.AddSingleton<IBotFrameworkHttpAdapter>(sp => sp.GetService<TeamsAdapter>());
-builder.Services.AddSingleton<BotAdapter>(sp => sp.GetService<TeamsAdapter>());
+builder.Services.AddSingleton<CloudAdapter, AdapterWithErrorHandler>();
+builder.Services.AddSingleton<IBotFrameworkHttpAdapter>(sp => sp.GetService<CloudAdapter>());
+builder.Services.AddSingleton<BotAdapter>(sp => sp.GetService<CloudAdapter>());
 
 builder.Services.AddSingleton<IStorage, MemoryStorage>();
 
 builder.Services.AddSingleton<OpenAIModel>(sp => new(
     new OpenAIModelOptions(config.OpenAI.ApiKey, config.OpenAI.DefaultModel)
     {
-        LogRequests = true
+        LogRequests = true,
+        Stream = true
     },
-    sp.GetService<ILoggerFactory>(),
-    new HttpClient(new OllamaHttpClientHandler(config.OllamaBaseAddress))
+    sp.GetService<ILoggerFactory>()
 ));
 
 // Create the bot as transient. In this case the ASP Controller is expecting an IBot.
@@ -60,24 +58,22 @@ builder.Services.AddTransient<IBot>(sp =>
     });
 
     // Create ActionPlanner
-    ActionPlanner<AppState> planner = new(
+    ActionPlanner<TurnState> planner = new(
         options: new(
             model: sp.GetService<OpenAIModel>(),
             prompts: prompts,
             defaultPrompt: async (context, state, planner) =>
             {
-                PromptTemplate template = prompts.GetPrompt("chat");
+                PromptTemplate template = prompts.GetPrompt("planner");
                 return await Task.FromResult(template);
             }
-        ),
+        )
+        { LogRepairs = true },
         loggerFactory: loggerFactory
     );
 
-    AIOptions<AppState> options = new(planner);
-    //options.EnableFeedbackLoop = true;
-
-    Application<AppState> app = new ApplicationBuilder<AppState>()
-        .WithAIOptions(options)
+    Application<TurnState> app = new ApplicationBuilder<TurnState>()
+        .WithAIOptions(new(planner))
         .WithStorage(sp.GetService<IStorage>())
         .Build();
 
@@ -93,14 +89,7 @@ builder.Services.AddTransient<IBot>(sp =>
         }
     });
 
-    app.OnFeedbackLoop((turnContext, turnState, feedbackLoopData, _) =>
-    {
-        Console.WriteLine($"Your feedback is {turnContext.Activity.Value.ToString()}");
-        return Task.CompletedTask;
-    });
-
-    var actionHandler = sp.GetService<TodoItemsActionHandler>();
-    app.AI.ImportActions(actionHandler);
+    app.AI.ImportActions(new ActionHandlers(sp.GetRequiredService<TodoDbContext>()));
 
     return app;
 });

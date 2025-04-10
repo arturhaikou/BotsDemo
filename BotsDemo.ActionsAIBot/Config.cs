@@ -1,4 +1,4 @@
-namespace BotsDemo.BasicAIBot
+namespace BotsDemo.ActionsAIBot
 {
     public class ConfigOptions
     {
@@ -7,8 +7,6 @@ namespace BotsDemo.BasicAIBot
         public string BOT_TYPE { get; set; }
         public string BOT_TENANT_ID { get; set; }
         public OpenAIConfigOptions OpenAI { get; set; }
-
-        public string OllamaBaseAddress { get; set; }
     }
 
     /// <summary>
@@ -17,6 +15,6 @@ namespace BotsDemo.BasicAIBot
     public class OpenAIConfigOptions
     {
         public string ApiKey { get; set; }
-        public string DefaultModel { get; set; }
+        public string DefaultModel = "gpt-4o-mini";
     }
 }
